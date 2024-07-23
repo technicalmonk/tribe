@@ -58,6 +58,7 @@ class GraphPerson(BaseModel):
     role: str = Field(description="Role of the person")
     provider: str = Field(description="The provider for the llm model")
     model: str = Field(description="The llm model to use for this person")
+    base_url: str = Field(description="Use a proxy to serve llm model")
     temperature: float = Field(description="The temperature of the llm model")
     backstory: str = Field(
         description="Description of the person's experience, motives and concerns."
@@ -94,6 +95,7 @@ class GraphTeam(BaseModel):
     )
     provider: str = Field(description="The provider of the team leader's llm model")
     model: str = Field(description="The llm model to use for this team leader")
+    base_url: str = Field(description="Use a proxy to serve llm model")
     temperature: float = Field(
         description="The temperature of the team leader's llm model"
     )
@@ -146,10 +148,17 @@ class ReturnTeamState(TypedDict):
 
 
 class BaseNode:
-    def __init__(self, provider: str, model: str, temperature: float):
-        self.model = all_models[provider](
-            model=model, temperature=temperature, streaming=True
-        )  # type: ignore[call-arg]
+    def __init__(
+        self, provider: str, model: str, base_url: str | None, temperature: float
+    ):
+        if isinstance(self.model, ChatOpenAI):
+            self.model = all_models[""](
+                model=model, temperature=temperature, base_url=base_url
+            )
+        else:
+            self.model = all_models[provider](
+                model=model, temperature=temperature, streaming=True
+            )  # type: ignore[call-arg]
         self.final_answer_model = all_models[provider](
             model=model, temperature=0, streaming=True
         )  # type: ignore[call-arg]
