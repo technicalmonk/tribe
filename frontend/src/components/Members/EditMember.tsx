@@ -171,6 +171,8 @@ export function EditMember({
       }))
     : []
 
+  const modelProvider = watch("provider")
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
       <ModalOverlay>
@@ -304,7 +306,7 @@ export function EditMember({
                 </Checkbox>
               </FormControl>
             ) : null}
-            <FormControl mt={4} isRequired isInvalid={!!errors.role}>
+            <FormControl mt={4} isRequired isInvalid={!!errors.provider}>
               <FormLabel htmlFor="provider">Provider</FormLabel>
               <Select
                 id="provider"
@@ -317,7 +319,7 @@ export function EditMember({
                 ))}
               </Select>
             </FormControl>
-            <FormControl mt={4} isRequired isInvalid={!!errors.role}>
+            <FormControl mt={4} isRequired isInvalid={!!errors.model}>
               <FormLabel htmlFor="model">Model</FormLabel>
               <Select id="model" {...register("model", { required: true })}>
                 {selectedProvider &&
@@ -328,6 +330,12 @@ export function EditMember({
                   ))}
               </Select>
             </FormControl>
+            {modelProvider === "ChatOpenAI" && (
+              <FormControl mt={4} isInvalid={!!errors.base_url}>
+                <FormLabel htmlFor="model">Use Proxy</FormLabel>
+                <Input id="base_url" {...register("base_url")} />
+              </FormControl>
+            )}
             <Controller
               control={control}
               name="temperature"
