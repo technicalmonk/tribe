@@ -151,9 +151,10 @@ class BaseNode:
     def __init__(
         self, provider: str, model: str, base_url: str | None, temperature: float
     ):
-        if isinstance(self.model, ChatOpenAI):
-            self.model = all_models[""](
-                model=model, temperature=temperature, base_url=base_url
+        # If using proxy, then we need to pass base url
+        if provider == "ChatOpenAI" and base_url:
+            self.model = all_models[provider](
+                model=model, temperature=temperature, streaming=True, base_url=base_url
             )
         else:
             self.model = all_models[provider](
