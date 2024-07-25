@@ -33,7 +33,7 @@ import {
 } from "../../client"
 import { type SubmitHandler, useForm, Controller } from "react-hook-form"
 import { Select as MultiSelect, chakraComponents } from "chakra-react-select"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 interface EditMemberProps {
   member: MemberOut
@@ -41,6 +41,8 @@ interface EditMemberProps {
   isOpen: boolean
   onClose: () => void
 }
+
+type ProviderType = "ChatOpenAI" | "ChatAnthropic"
 
 const customSelectOption = {
   Option: (props: any) => (
@@ -51,7 +53,7 @@ const customSelectOption = {
 }
 
 // TODO: Place this somewhere else.
-const AVAILABLE_MODELS = {
+const AVAILABLE_MODELS: Record<ProviderType, string[]> = {
   ChatOpenAI: ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"],
   ChatAnthropic: [
     "claude-3-opus-20240229",
@@ -100,6 +102,7 @@ export function EditMember({
     reset,
     control,
     watch,
+    setValue,
     formState: { isSubmitting, errors, isDirty, isValid },
   } = useForm<MemberUpdate>({
     mode: "onBlur",
@@ -142,6 +145,14 @@ export function EditMember({
     },
   })
 
+  const modelProvider = watch("provider")
+  // update the model when the provider changes
+  useEffect(() => {
+    if (modelProvider) {
+      setValue("model", AVAILABLE_MODELS[modelProvider as ProviderType][0])
+    }
+  }, [modelProvider, setValue])
+
   const onSubmit: SubmitHandler<TeamUpdate> = async (data) => {
     mutation.mutate(data)
   }
@@ -170,8 +181,6 @@ export function EditMember({
         value: upload.id,
       }))
     : []
-
-  const modelProvider = watch("provider")
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
